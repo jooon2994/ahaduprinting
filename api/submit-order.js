@@ -25,17 +25,22 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Nodemailer setup (replace with your email info or environment variables)
+// Nodemailer setup (using provided Gmail credentials)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER || 'your-email@gmail.com',  // Your email or use environment variable
-    pass: process.env.EMAIL_PASS || 'your-email-password'    // Your email password or use environment variable
+    user: 'yohannisaweke29@gmail.com',  // Your Gmail address
+    pass: '2321271630@wW'               // Your Gmail password (consider switching to App Password)
   }
 });
 
 // Serve static files (Frontend)
 app.use(express.static('public'));
+
+// Serve index.html for the root "/"
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public', 'index.html'));
+});
 
 // API route to handle file uploads and form submission
 app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
@@ -52,8 +57,8 @@ app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
 
   // Email configuration
   const mailOptions = {
-    from: process.env.EMAIL_USER || 'your-email@gmail.com',
-    to: 'your-email@gmail.com',  // Replace with your receiving email
+    from: 'yohannisaweke29@gmail.com',
+    to: 'yohannisaweke29@gmail.com',  // Send to yourself (same email)
     subject: 'New Print Order Received',
     text: `Phone Number: ${phoneNumber}\nAdditional Info: ${additionalInfo || 'None'}`,
     attachments: files.map(file => ({
@@ -76,11 +81,6 @@ app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
       files: files.map(f => f.filename)
     });
   });
-});
-
-// Serve index.html for root route "/"
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public', 'index.html'));
 });
 
 // Start server on Railway's provided port (or 3000 locally)
