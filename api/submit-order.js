@@ -63,7 +63,7 @@ app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
   // Compose the email options
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: 'your-email@gmail.com',  // Your email
+    to: 'yohannisaweke29@gmail.com',  // Your email
     subject: 'New Print Order Received',
     text: `Phone Number: ${phoneNumber}\nAdditional Info: ${additionalInfo || 'None'}`,
     attachments: files.map(file => ({
