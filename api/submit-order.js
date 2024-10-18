@@ -1,16 +1,15 @@
-// api/submit-order.js
+const express = require('express');
 const multer = require('multer');
+const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
-const express = require('express');
-const nodemailer = require('nodemailer');
 
-// Create express app instance
+// Express setup
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Set up storage for file uploads
+// Setup Multer for multiple file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = './uploads/';
@@ -39,16 +38,16 @@ const upload = multer({
   }
 });
 
-// Nodemailer setup
+// Nodemailer setup (use environment variables for security)
 const transporter = nodemailer.createTransport({
-  service: 'gmail',  // You can use any email service (Gmail, Outlook, etc.)
+  service: 'gmail',
   auth: {
-    user: 'wizyoni7@gmail.com',  // Your email
-    pass: '2321271630@wW'    // Your email password (consider using an app password or env variable for security)
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
 });
 
-// API route to handle multiple file uploads and send email
+// API route to handle file uploads and form data
 app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
   const { phoneNumber, additionalInfo } = req.body;
   const files = req.files;
@@ -61,10 +60,10 @@ app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
     return res.status(400).json({ error: 'Phone number is required.' });
   }
 
-  // Create email options
-  let mailOptions = {
-    from: 'wizyoni7@gmail.com',
-    to: 'Yohannisaweke29@gmail.com',  // Your email (where you want to receive the order)
+  // Compose the email options
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: 'yohannisaweke29@gmail.com',  // Your email
     subject: 'New Print Order Received',
     text: `Phone Number: ${phoneNumber}\nAdditional Info: ${additionalInfo || 'None'}`,
     attachments: files.map(file => ({
@@ -73,16 +72,15 @@ app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
     }))
   };
 
-  // Send the email with the uploaded files attached
+  // Send the email with attached files
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error sending email:', error);
       return res.status(500).json({ error: 'Failed to send email' });
     }
 
-    // Success response
     res.status(200).json({
-      message: 'Order submitted successfully and email sent!',
+      message: 'Order submitted successfully, and email sent!',
       phoneNumber,
       additionalInfo,
       files: files.map(f => f.filename)
@@ -90,4 +88,11 @@ app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
   });
 });
 
-module.exports = app;
+// Serve static files
+app.use(express.static('public'));
+
+// Start the server on the port provided by Railway (or fallback to 3000)
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
