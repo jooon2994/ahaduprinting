@@ -1,0 +1,11 @@
+{
+    "builds": [
+      { "src": "api/submit-order.js", "use": "@vercel/node" },
+      { "src": "public/**/*", "use": "@vercel/static" }
+    ],
+    "routes": [
+      { "src": "/api/(.*)", "dest": "/api/submit-order.js" },
+      { "src": "/", "dest": "/public/index.html" }
+    ]
+  }
+  
