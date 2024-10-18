@@ -1,15 +1,15 @@
 const express = require('express');
 const multer = require('multer');
 const nodemailer = require('nodemailer');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 
-// Express setup
+// Initialize Express
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Setup Multer for multiple file uploads
+// Multer setup for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = './uploads/';
@@ -23,31 +23,21 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({
-  storage: storage,
-  fileFilter: (req, file, cb) => {
-    const filetypes = /doc|docx|pdf/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
+const upload = multer({ storage });
 
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb('Error: Only .doc, .docx, or .pdf files are allowed!');
-    }
-  }
-});
-
-// Nodemailer setup (use environment variables for security)
+// Nodemailer setup (replace with your email info or environment variables)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    user: process.env.EMAIL_USER || 'your-email@gmail.com',  // Your email or use environment variable
+    pass: process.env.EMAIL_PASS || 'your-email-password'    // Your email password or use environment variable
   }
 });
 
-// API route to handle file uploads and form data
+// Serve static files (Frontend)
+app.use(express.static('public'));
+
+// API route to handle file uploads and form submission
 app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
   const { phoneNumber, additionalInfo } = req.body;
   const files = req.files;
@@ -60,10 +50,10 @@ app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
     return res.status(400).json({ error: 'Phone number is required.' });
   }
 
-  // Compose the email options
+  // Email configuration
   const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: 'yohannisaweke29@gmail.com',  // Your email
+    from: process.env.EMAIL_USER || 'your-email@gmail.com',
+    to: 'your-email@gmail.com',  // Replace with your receiving email
     subject: 'New Print Order Received',
     text: `Phone Number: ${phoneNumber}\nAdditional Info: ${additionalInfo || 'None'}`,
     attachments: files.map(file => ({
@@ -72,7 +62,7 @@ app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
     }))
   };
 
-  // Send the email with attached files
+  // Send email with the uploaded files attached
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error sending email:', error);
@@ -80,7 +70,7 @@ app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
     }
 
     res.status(200).json({
-      message: 'Order submitted successfully, and email sent!',
+      message: 'Order submitted successfully and email sent!',
       phoneNumber,
       additionalInfo,
       files: files.map(f => f.filename)
@@ -88,10 +78,12 @@ app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
   });
 });
 
-// Serve static files
-app.use(express.static('public'));
+// Serve index.html for root route "/"
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public', 'index.html'));
+});
 
-// Start the server on the port provided by Railway (or fallback to 3000)
+// Start server on Railway's provided port (or 3000 locally)
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
