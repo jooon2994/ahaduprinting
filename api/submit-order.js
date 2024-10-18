@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Telegram Bot setup
-const TELEGRAM_BOT_TOKEN = '7289662775:AAEeOB-MiJNYJSToqr3TATuAVtY-N9f0Ke4';  // Replace with your Telegram bot token
+const TELEGRAM_BOT_TOKEN = '7533561581:AAFFwyb_j8ZNBppySZBtmMl-wSfnkB9SEzs';  // Replace with your Telegram bot token
 const CHAT_ID = '1241311689';  // Replace with your Telegram chat ID
 
 // Function to send messages to Telegram
