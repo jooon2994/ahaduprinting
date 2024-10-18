@@ -1,8 +1,8 @@
 const express = require('express');
 const multer = require('multer');
-const nodemailer = require('nodemailer');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
 
 // Initialize Express
 const app = express();
@@ -25,14 +25,23 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Nodemailer setup (using provided Gmail credentials)
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'yohannisaweke29@gmail.com',  // Your Gmail address
-    pass: '2321271630@wW'               // Your Gmail password (consider switching to App Password)
+// Telegram Bot setup
+const TELEGRAM_BOT_TOKEN = '7289662775:AAEeOB-MiJNYJSToqr3TATuAVtY-N9f0Ke4';  // Replace with your Telegram bot token
+const CHAT_ID = '1241311689';  // Replace with your Telegram chat ID
+
+// Function to send messages to Telegram
+const sendTelegramMessage = async (message) => {
+  const telegramURL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  try {
+    await axios.post(telegramURL, {
+      chat_id: CHAT_ID,
+      text: message,
+      parse_mode: 'Markdown'
+    });
+  } catch (error) {
+    console.error('Error sending message to Telegram:', error);
   }
-});
+};
 
 // Serve static files (Frontend)
 app.use(express.static('public'));
@@ -55,31 +64,23 @@ app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
     return res.status(400).json({ error: 'Phone number is required.' });
   }
 
-  // Email configuration
-  const mailOptions = {
-    from: 'yohannisaweke29@gmail.com',
-    to: 'yohannisaweke29@gmail.com',  // Send to yourself (same email)
-    subject: 'New Print Order Received',
-    text: `Phone Number: ${phoneNumber}\nAdditional Info: ${additionalInfo || 'None'}`,
-    attachments: files.map(file => ({
-      filename: file.originalname,
-      path: file.path
-    }))
-  };
+  // Create a message for Telegram
+  const message = `
+*New Print Order Received*:
+- *Phone Number*: ${phoneNumber}
+- *Additional Info*: ${additionalInfo || 'None'}
+- *Files*: ${files.map(file => file.originalname).join(', ')}
+- *Timestamp*: ${new Date().toLocaleString()}
+  `;
 
-  // Send email with the uploaded files attached
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error('Error sending email:', error);
-      return res.status(500).json({ error: 'Failed to send email' });
-    }
+  // Send the message to Telegram
+  sendTelegramMessage(message);
 
-    res.status(200).json({
-      message: 'Order submitted successfully and email sent!',
-      phoneNumber,
-      additionalInfo,
-      files: files.map(f => f.filename)
-    });
+  res.status(200).json({
+    message: 'Order submitted successfully and sent to Telegram!',
+    phoneNumber,
+    additionalInfo,
+    files: files.map(f => f.filename)
   });
 });
 
