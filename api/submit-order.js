@@ -29,7 +29,7 @@ const upload = multer({ storage });
 const TELEGRAM_BOT_TOKEN = '7533561581:AAFFwyb_j8ZNBppySZBtmMl-wSfnkB9SEzs';  // Replace with your Telegram bot token
 const CHAT_ID = '1241311689';  // Replace with your Telegram chat ID
 
-// Function to send messages to Telegram
+// Function to send a message to Telegram
 const sendTelegramMessage = async (message) => {
   const telegramURL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
   try {
@@ -43,6 +43,23 @@ const sendTelegramMessage = async (message) => {
   }
 };
 
+// Function to send a document (file) to Telegram
+const sendTelegramDocument = async (filePath, fileName) => {
+  const telegramURL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`;
+
+  const formData = new FormData();
+  formData.append('chat_id', CHAT_ID);
+  formData.append('document', fs.createReadStream(filePath), fileName);
+
+  try {
+    await axios.post(telegramURL, formData, {
+      headers: formData.getHeaders()
+    });
+  } catch (error) {
+    console.error('Error sending document to Telegram:', error);
+  }
+};
+
 // Serve static files (Frontend)
 app.use(express.static('public'));
 
@@ -52,7 +69,7 @@ app.get('/', (req, res) => {
 });
 
 // API route to handle file uploads and form submission
-app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
+app.post('/api/submit-order', upload.array('files', 10), async (req, res) => {
   const { phoneNumber, additionalInfo } = req.body;
   const files = req.files;
 
@@ -73,8 +90,14 @@ app.post('/api/submit-order', upload.array('files', 10), (req, res) => {
 - *Timestamp*: ${new Date().toLocaleString()}
   `;
 
-  // Send the message to Telegram
-  sendTelegramMessage(message);
+  // Send the message to Telegram (without files)
+  await sendTelegramMessage(message);
+
+  // Send each file to Telegram as a document
+  for (const file of files) {
+    const filePath = path.join(__dirname, '../uploads', file.filename);
+    await sendTelegramDocument(filePath, file.originalname);
+  }
 
   res.status(200).json({
     message: 'Order submitted successfully and sent to Telegram!',
