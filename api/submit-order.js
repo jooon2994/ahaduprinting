@@ -3,6 +3,7 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
+const FormData = require('form-data');  // Added form-data package for sending files
 
 // Initialize Express
 const app = express();
@@ -53,7 +54,9 @@ const sendTelegramDocument = async (filePath, fileName) => {
 
   try {
     await axios.post(telegramURL, formData, {
-      headers: formData.getHeaders()
+      headers: {
+        ...formData.getHeaders()
+      }
     });
   } catch (error) {
     console.error('Error sending document to Telegram:', error);
