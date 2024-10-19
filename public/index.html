@@ -6,7 +6,6 @@
     <title>Ahadu Printing Service</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom Hover Effects */
         .file-upload:hover {
             background-color: #f3f4f6;
             border-color: #3b82f6;
@@ -15,64 +14,80 @@
             background-color: #3b82f6;
             color: white;
         }
-        /* File upload dropzone styling */
         .drop-zone {
             transition: background-color 0.3s ease-in-out;
         }
         .drop-zone:hover {
             background-color: #e0f2fe;
         }
+        .confirmation-message {
+            display: none;
+            background-color: #28a745;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .error-message {
+            display: none;
+            background-color: #dc3545;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
 
-    <!-- Header with Logo -->
-    <header class="bg-white shadow-md py-4 mb-10">
-        <div class="max-w-7xl mx-auto flex items-center justify-between px-4">
-            <img src="Colorful Foraml Business Digital Printing Logo (1).png" alt="Ahadu Printing Logo" class="h-12">
-            <h1 class="text-2xl font-bold text-gray-700">Ahadu Printing Service</h1>
-        </div>
-    </header>
+    <!-- Confirmation Message -->
+    <div id="confirmationMessage" class="confirmation-message">
+        Your order is confirmed! You will receive a confirmation message on Telegram shortly.
+    </div>
+
+    <!-- Error Message -->
+    <div id="errorMessage" class="error-message">
+        There was an issue submitting your order. Please try again.
+    </div>
 
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-        <!-- File Upload Section -->
-        <section class="mb-8">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Upload Your Files</h2>
-            <div id="file-upload" class="file-upload p-6 border-2 border-dashed border-gray-300 rounded-lg text-center drop-zone cursor-pointer">
-                <p class="text-gray-500">Drag and drop your files here or <span class="text-blue-500 font-bold">browse</span></p>
-                <p class="text-sm text-gray-400">Accepted formats: .doc, .docx, .pdf (you can upload multiple files)</p>
-                <input type="file" id="fileInput" name="files" class="hidden" accept=".doc,.docx,.pdf" multiple>
-            </div>
-        </section>
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Upload Your Files</h2>
+        <div id="file-upload" class="file-upload p-6 border-2 border-dashed border-gray-300 rounded-lg text-center drop-zone cursor-pointer">
+            <p class="text-gray-500">Drag and drop your files here or <span class="text-blue-500 font-bold">browse</span></p>
+            <p class="text-sm text-gray-400">Accepted formats: .doc, .docx, .pdf (you can upload multiple files)</p>
+            <input type="file" id="fileInput" name="files" class="hidden" accept=".doc,.docx,.pdf" multiple>
+        </div>
 
         <!-- Phone Number Input -->
-        <section class="mb-8">
+        <section class="mt-6">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Enter Your Phone Number</h2>
             <input id="phoneNumber" name="phoneNumber" type="text" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your phone number">
         </section>
 
         <!-- Additional Info Section -->
-        <section class="mb-8">
+        <section class="mt-6">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Additional Information</h2>
             <textarea id="additionalInfo" name="additionalInfo" rows="4" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Any specific print preferences (e.g., color, paper type)..."></textarea>
         </section>
 
         <!-- Action Buttons -->
-        <div class="flex justify-end space-x-4">
+        <div class="mt-6 flex justify-end space-x-4">
             <button id="submitBtn" class="hover-button px-6 py-3 bg-blue-500 text-white rounded-lg font-bold shadow hover:shadow-md transition-all">Submit Order</button>
             <button id="clearBtn" class="hover-button px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-bold shadow hover:shadow-md transition-all">Clear</button>
         </div>
     </main>
 
-    <!-- JavaScript to Handle File Upload and Form Actions -->
     <script>
         const fileUploadBox = document.getElementById('file-upload');
         const fileInput = document.getElementById('fileInput');
         const submitBtn = document.getElementById('submitBtn');
         const clearBtn = document.getElementById('clearBtn');
+        const confirmationMessage = document.getElementById('confirmationMessage');
+        const errorMessage = document.getElementById('errorMessage');
 
-        // Handle file selection
         fileUploadBox.addEventListener('click', () => {
             fileInput.click();
         });
@@ -87,9 +102,11 @@
             }
         });
 
-        // Handle form submission
         submitBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            confirmationMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+
             const phoneNumber = document.getElementById('phoneNumber').value;
             const additionalInfo = document.getElementById('additionalInfo').value;
 
@@ -98,7 +115,6 @@
                 return;
             }
 
-            // Create FormData object to send files and form data
             const formData = new FormData();
             for (let i = 0; i < fileInput.files.length; i++) {
                 formData.append('files', fileInput.files[i]);
@@ -114,28 +130,24 @@
             .then(response => response.json())
             .then(data => {
                 if (data.message) {
-                    alert('Order submitted successfully!');
-                    // Clear the form after submission
-                    fileInput.value = '';
-                    document.getElementById('phoneNumber').value = '';
-                    document.getElementById('additionalInfo').value = '';
-                    fileUploadBox.innerHTML = '<p class="text-gray-500">Drag and drop your files here or <span class="text-blue-500 font-bold">browse</span></p>';
+                    confirmationMessage.style.display = 'block';  // Show confirmation message
                 } else {
-                    alert('Error: ' + data.error);
+                    errorMessage.style.display = 'block';  // Show error message
                 }
             })
             .catch(err => {
                 console.error('Error:', err);
-                alert('Error submitting the form.');
+                errorMessage.style.display = 'block';  // Show error message
             });
         });
 
-        // Clear form
         clearBtn.addEventListener('click', () => {
             fileInput.value = '';
             document.getElementById('phoneNumber').value = '';
             document.getElementById('additionalInfo').value = '';
             fileUploadBox.innerHTML = '<p class="text-gray-500">Drag and drop your files here or <span class="text-blue-500 font-bold">browse</span></p>';
+            confirmationMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
         });
     </script>
 
