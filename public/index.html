@@ -38,6 +38,22 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+        /* Hamburger menu styling */
+        .menu-icon {
+            cursor: pointer;
+            display: block;
+        }
+        .menu-icon span {
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            margin: 5px 0;
+            display: block;
+        }
+        /* Hidden mobile menu */
+        #mobile-menu {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -50,11 +66,27 @@
                 <img src="Colorful Foraml Business Digital Printing Logo (1).png" alt="Ahadu Printing Logo" class="h-12">
                 <span class="ml-4 text-white text-2xl font-bold">Ahadu Printing</span>
             </div>
-            <!-- Welcome Message -->
-            <div class="text-white text-lg font-semibold">
+
+            <!-- Welcome Message (Hidden on mobile) -->
+            <div class="hidden md:block text-white text-lg font-semibold">
                 Welcome to Our Premium Printing Service!
             </div>
-            <!-- Nav Links -->
+
+            <!-- Hamburger Menu Icon (Visible on mobile) -->
+            <div class="block md:hidden menu-icon" id="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <!-- Navigation Links -->
+            <div id="mobile-menu" class="absolute top-16 right-0 bg-blue-600 text-white w-full md:hidden text-center">
+                <a href="#services" class="block py-2 hover:bg-blue-700 transition">Services</a>
+                <a href="#about" class="block py-2 hover:bg-blue-700 transition">About Us</a>
+                <a href="#contact" class="block py-2 hover:bg-blue-700 transition">Contact</a>
+            </div>
+
+            <!-- Desktop Navigation Links -->
             <div class="hidden md:flex space-x-6">
                 <a href="#services" class="text-white hover:text-gray-200 transition">Services</a>
                 <a href="#about" class="text-white hover:text-gray-200 transition">About Us</a>
@@ -65,7 +97,7 @@
 
     <!-- Confirmation Message -->
     <div id="confirmationMessage" class="confirmation-message">
-        "Your order is confirmed! Our customer service will contact you soon. If not, feel free to reach us at 0940405038 or 0799445038
+        Your order is confirmed! You will receive a confirmation message on Telegram shortly. If not, feel free to reach us at 0940405038 or 0799445038.
     </div>
 
     <!-- Error Message -->
@@ -108,6 +140,8 @@
         const clearBtn = document.getElementById('clearBtn');
         const confirmationMessage = document.getElementById('confirmationMessage');
         const errorMessage = document.getElementById('errorMessage');
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
 
         fileUploadBox.addEventListener('click', () => {
             fileInput.click();
@@ -169,6 +203,15 @@
             fileUploadBox.innerHTML = '<p class="text-gray-500">Drag and drop your files here or <span class="text-blue-500 font-bold">browse</span></p>';
             confirmationMessage.style.display = 'none';
             errorMessage.style.display = 'none';
+        });
+
+        // Handle hamburger menu toggle
+        menuToggle.addEventListener('click', () => {
+            if (mobileMenu.style.display === 'block') {
+                mobileMenu.style.display = 'none';
+            } else {
+                mobileMenu.style.display = 'block';
+            }
         });
     </script>
 
