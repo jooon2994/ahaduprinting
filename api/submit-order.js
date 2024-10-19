@@ -28,7 +28,7 @@ const upload = multer({ storage });
 
 // Telegram Bot setup
 const TELEGRAM_BOT_TOKEN = '7533561581:AAFFwyb_j8ZNBppySZBtmMl-wSfnkB9SEzs';  // Replace with your Telegram bot token
-const CHAT_ID = '1241311689';  // Replace with your Telegram chat ID
+const CHAT_ID = '5588629674';  // Replace with your Telegram chat ID
 
 // Function to send a message to Telegram
 const sendTelegramMessage = async (message) => {
