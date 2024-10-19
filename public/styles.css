@@ -1,0 +1,47 @@
+/* styles.css */
+body {
+    background-color: #f9fafb; /* light gray background */
+    font-family: 'Arial', sans-serif; /* use a simple sans-serif font */
+}
+
+.navbar {
+    background: linear-gradient(to right, #3b82f6, #8b5cf6); /* blue to purple gradient */
+    padding: 1rem;
+}
+
+.navbar .logo {
+    height: 50px; /* Set logo height */
+}
+
+.navbar h1 {
+    color: white; /* logo text color */
+}
+
+.navbar a {
+    color: white; /* link color */
+    margin: 0 1rem; /* spacing between links */
+    text-decoration: none; /* remove underline */
+}
+
+.navbar a:hover {
+    text-decoration: underline; /* underline on hover */
+}
+
+/* Other common styles for sections */
+.section {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+p {
+    margin-bottom: 1rem;
+}
